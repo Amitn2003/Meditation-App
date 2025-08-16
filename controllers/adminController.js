@@ -20,9 +20,9 @@ export const getAllUsers = async (req, res, next) => {
  */
 export const createSession = async (req, res, next) => {
   try {
-    const { title, description, duration, style, music } = req.body;
+    const { title, description, duration, style, music, url } = req.body;
 
-    if (!title || !description || !duration || !style) {
+    if (!title || !description || !duration || !style || !url) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -32,6 +32,7 @@ export const createSession = async (req, res, next) => {
       duration,
       style,
       music,
+      url
     });
 
     res.status(201).json({
@@ -57,12 +58,14 @@ export const updateSession = async (req, res, next) => {
     if (!session) {
       return res.status(404).json({ message: "Session not found" });
     }
+    console.log(req.body, "Req body")
 
     const updatedSession = await MeditationSession.findByIdAndUpdate(
       id,
       req.body,
       { new: true }
     );
+    console.log(updatedSession)
 
     res.json({
       message: "Session updated successfully",
@@ -98,8 +101,10 @@ export const deleteSession = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
   try {
     const { id } = req.params;
+    console.log(id)
 
     const user = await User.findById(id);
+    console.log(user)
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

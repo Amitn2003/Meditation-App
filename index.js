@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import meditationRoutes from "./routes/meditationRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import sessionRoutes from "./routes/sessionRoutes.js";
 import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 
 dotenv.config();
@@ -38,6 +39,7 @@ app.get('/api', (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/meditation", meditationRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/sessions", sessionRoutes);
 
 // Error handling
 app.use(notFound);

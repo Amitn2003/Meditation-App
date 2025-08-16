@@ -5,6 +5,7 @@ import {
   updateSession,
   deleteSession,
   getAllSessionsForAdmin,
+  deleteUser
 } from "../controllers/adminController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -21,5 +22,11 @@ router.put("/sessions/:id", protect, adminOnly, updateSession);
 
 // Admin — delete meditation session
 router.delete("/sessions/:id", protect, adminOnly, deleteSession);
+
+
+
+// delete user
+router.delete('/user/:id', protect, adminOnly, deleteUser)
+
 
 export default router;
