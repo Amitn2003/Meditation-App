@@ -6,10 +6,20 @@ import { loginSchema, registerSchema } from "../validators/authValidator.js";
 // Register new user
 export const register = async (req, res) => {
   try {
+      if (!req.body || Object.keys(req.body).length === 0) {
+    return res.status(400).json({ message: "Request body is required" });
+  }
+
     const parsed = registerSchema.parse(req.body);
 
     const existingUser = await User.findOne({ email: parsed.email });
-    if (existingUser) return res.status(400).json({ message: "User already exists" });
+    if (existingUser) return res.status(400).json(
+      { message: "User already exists",
+    user: {
+      _id: existingUser._id,
+      email: existingUser.email,
+      name: existingUser.name
+    } });
 
     const hashedPassword = await bcrypt.hash(parsed.password, 10);
     const newUser = new User({
@@ -19,7 +29,19 @@ export const register = async (req, res) => {
     });
 
     await newUser.save();
-    res.status(201).json({ message: "User registered successfully" });
+
+    const token = jwt.sign(
+      { id: newUser._id }, 
+      process.env.JWT_SECRET
+    );
+
+    res.status(201).json({ message: "User registered successfully",
+      user: {
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+      },
+      token, });
 
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -29,21 +51,43 @@ export const register = async (req, res) => {
 // Login user
 export const login = async (req, res) => {
   try {
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({ message: "Request body is required" });
+    }
+
     const parsed = loginSchema.parse(req.body);
 
     const user = await User.findOne({ email: parsed.email });
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    console.log(parsed)
+    console.log(user)
+
+    // const hashedPassword = await bcrypt.hash(parsed.password.trim(), 10);
+    // console.log("Hashed pass", hashedPassword)
+    console.log("Parsed pass", parsed.password.trim())
+    console.log("User pass", user.password)
 
     const isMatch = await bcrypt.compare(parsed.password, user.password);
+    console.log(isMatch)
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+
+
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      process.env.JWT_SECRET
     );
 
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+    res.json({
+      message: "Login successful", 
+      token, 
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role 
+      } 
+    });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

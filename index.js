@@ -13,8 +13,26 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*'
+}));
+
 app.use(express.json());
+
+
+
+// Test root route
+app.get('/', (req, res) => {
+  res.send('Server is running');
+});
+
+// Test /api route
+app.get('/api', (req, res) => {
+  res.json({ message: 'API is working' });
+});
+
+
+
 
 // Routes
 app.use("/api/auth", authRoutes);
